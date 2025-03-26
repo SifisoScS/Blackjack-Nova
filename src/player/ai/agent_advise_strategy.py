@@ -16,3 +16,18 @@ class AgentAdviseStrategy(BasicStrategyAgent):
 
       # Fallback: Use basic strategy if no powerups are good
       return super().get_action(hand, dealer_upcard, powerups_available)
+    
+    def get_action(self, hand, dealer_upcard, powerups_available):
+      #Use our powerup advisor
+      advisor = powerup_advisor.PowerUpAdvisor(self.deck, hand, dealer_upcard)
+      if advisor._evaluate_shuffle_up() > 0 and powerups_available['shuffle_up']:
+          return 'shuffle_up'
+
+      if advisor._evaluate_peek() > 0 and powerups_available['peek']:
+          return 'peek'
+
+      if advisor._evaluate_perfect_swap() > 0.1 and powerups_available['perfect_swap']: #Threshold of 0.1
+          return 'perfect_swap'
+
+      # Fallback: Use basic strategy if no powerups are good
+      return super().get_action(hand, dealer_upcard, powerups_available)
