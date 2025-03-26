@@ -4,6 +4,12 @@ from src.player.human_player import HumanPlayer
 from src.player.ai.basic_strategy_agent import BasicStrategyAgent
 from src.dealer.dealer import Dealer
 
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.core.deck import Deck
+
 def play_round(deck, player, dealer, powerups_available):
   player.hand = Hand()
   dealer.hand = Hand()
@@ -23,7 +29,8 @@ def play_round(deck, player, dealer, powerups_available):
 
   #Player's turn
   while player.hand.get_value() < 21:
-      action = player.get_action(player.hand, dealer.hand.cards[0], powerups_available)
+      action = player.get_action(player.hand, dealer.hand.cards[0])
+
       if action == 'h':
           player.hand.add_card(deck.deal())
           print(f"{player.name} hits. Hand: {player.hand} (Value: {player.hand.get_value()})")
@@ -44,6 +51,15 @@ def play_round(deck, player, dealer, powerups_available):
         print(f"{player.name} uses Peek!")
         print(f"Dealer's hand: {dealer.hand} (Value: {dealer.hand.get_value()})")
         powerups_available['peek'] = False
+      elif action == 'perfect_swap' and powerups_available['perfect_swap']:
+        print(f"{player.name} uses Perfect Swap!")
+        #For now, just swap the first card.
+        card_to_swap = player.hand.cards[0]
+        player.hand.cards.remove(card_to_swap)
+        new_card = deck.deal()
+        player.hand.add_card(new_card)
+        powerups_available['perfect_swap'] = False
+        print(f"{player.name}'s hand: {player.hand} (Value: {player.hand.get_value()})")
       else:
         print("Invalid Action")
 
@@ -88,7 +104,8 @@ if __name__ == "__main__":
 
     powerups_available = {
         'shuffle_up': True,
-        'peek': True
+        'peek': True,
+        'perfect_swap': True  # Added Perfect Swap
     }
 
     play_round(deck, player, dealer, powerups_available)
